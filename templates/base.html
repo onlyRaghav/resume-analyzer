@@ -1,0 +1,35 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ PRODUCT_NAME }}{% endblock %}</title>
+    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+    <link rel="stylesheet" href="{% static 'css/app.css' %}">
+    <script defer src="{% static 'js/app.js' %}"></script>
+</head>
+<body>
+    <div class="shell">
+        <header class="site-header">
+            <a class="brand" href="{% url 'analyzer:landing' %}">
+                <span class="brand-mark">RI</span>
+                <span>{{ PRODUCT_NAME }}</span>
+            </a>
+            <nav class="site-nav">
+                <a href="{% url 'analyzer:landing' %}">Analyze Resume</a>
+            </nav>
+        </header>
+        <main class="page">
+            {% if messages %}
+                <div class="flash-stack">
+                    {% for message in messages %}
+                        <div class="flash">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+</body>
+</html>

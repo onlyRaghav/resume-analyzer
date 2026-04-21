@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}Error | {{ PRODUCT_NAME }}{% endblock %}
+
+{% block content %}
+<section class="processing-layout">
+    <div class="panel panel--focus">
+        <p class="eyebrow">Something went wrong</p>
+        <h1>We hit an unrecoverable error.</h1>
+        <p class="lede">Please head back to the landing page and try another upload.</p>
+        <a href="{% url 'analyzer:landing' %}" class="button">Return Home</a>
+    </div>
+</section>
+{% endblock %}

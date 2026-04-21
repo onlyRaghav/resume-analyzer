@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}{{ PRODUCT_NAME }} | AI Resume Analyzer{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div class="hero-copy">
+        <p class="eyebrow">AI Resume Analyzer</p>
+        <h1>Find out how competitive your resume really is.</h1>
+        <p class="lede">
+            Upload a PDF or DOCX and get a structured scorecard, ATS-risk signal, keyword gaps,
+            and practical next steps in one focused dashboard.
+        </p>
+        <div class="hero-points">
+            <span>PDF and DOCX support</span>
+            <span>Shareable read-only results</span>
+            <span>Target-role aware analysis</span>
+        </div>
+    </div>
+    <div class="hero-card">
+        <div class="panel">
+            <div class="panel-header">
+                <h2>Upload your resume</h2>
+                <p>Desktop-first, responsive, and built for a fast MVP loop.</p>
+            </div>
+            <form method="post" enctype="multipart/form-data" class="upload-form">
+                {% csrf_token %}
+                {% if form.non_field_errors %}
+                    <div class="form-errors">{{ form.non_field_errors }}</div>
+                {% endif %}
+                <label class="dropzone">
+                    <span class="dropzone-title">Drag, drop, or browse for a resume</span>
+                    <span class="dropzone-meta">Accepted: PDF, DOCX up to {{ max_upload_mb }} MB</span>
+                    {{ form.resume_file }}
+                </label>
+                {% if form.resume_file.errors %}
+                    <div class="field-error">{{ form.resume_file.errors|join:", " }}</div>
+                {% endif %}
+                <div class="field">
+                    <label for="{{ form.target_job_title.id_for_label }}">Target Job Title or Role</label>
+                    {{ form.target_job_title }}
+                </div>
+                {% if form.target_job_title.errors %}
+                    <div class="field-error">{{ form.target_job_title.errors|join:", " }}</div>
+                {% endif %}
+                <div class="field">
+                    <div class="field-heading">
+                        <label for="{{ form.job_description.id_for_label }}">Paste Job Description</label>
+                        <span id="job-description-count">{{ form.job_description.value|default_if_none:""|length }}/{{ job_description_limit }}</span>
+                    </div>
+                    {{ form.job_description }}
+                </div>
+                {% if form.job_description.errors %}
+                    <div class="field-error">{{ form.job_description.errors|join:", " }}</div>
+                {% endif %}
+                <button type="submit" class="button">Analyze Resume</button>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}

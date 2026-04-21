@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}Analyzing | {{ PRODUCT_NAME }}{% endblock %}
+
+{% block content %}
+<section class="processing-layout">
+    <div class="panel panel--focus">
+        <p class="eyebrow">Analysis in progress</p>
+        <h1>We’re turning your resume into a structured scorecard.</h1>
+        <p class="lede">We take a little extra time here so your scorecard feels deliberate, polished, and easier to trust.</p>
+        <div class="progress-shell">
+            <div class="progress-bar"></div>
+        </div>
+        <div
+            id="analysis-status"
+            class="status-stack"
+            hx-get="{% url 'analyzer:results-status' uuid=result.uuid %}"
+            hx-trigger="load, every 3s"
+            hx-swap="innerHTML"
+        >
+            <div class="status-card">Upload received. We’re reviewing your resume and preparing the final dashboard.</div>
+        </div>
+    </div>
+</section>
+{% endblock %}

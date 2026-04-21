@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block title %}Results | {{ PRODUCT_NAME }}{% endblock %}
+
+{% block content %}
+{% if shared_mode %}
+    <div class="shared-banner">This is a shared view. It is read-only and may expire automatically.</div>
+{% endif %}
+<div class="privacy-banner">{{ PRIVACY_NOTICE }}</div>
+<section class="results-grid">
+    <div class="results-main">
+        <div class="panel score-panel">
+            <div class="score-gauge score-gauge--{{ result.score_band }}">
+                <div class="score-gauge__inner">
+                    <p class="score-value">{{ result.overall_score }}</p>
+                    <!-- <span class="score-label">Overall Score</span> -->
+                </div>
+            </div>
+            <div class="score-summary" style="display: flex;flex-direction: column;align-items: flex-start;gap: 0.5rem;">
+                <span class="pill pill--{{ result.score_band }}">{{ result.hire_probability }} Hire Probability</span>
+                <h1>Resume performance snapshot</h1>
+                <p>{{ result.summary }}</p>
+                {% if not shared_mode %}
+                    <div class="cta-row">
+                        <a href="{% url 'analyzer:landing' %}" class="button button--secondary">Analyze Another Resume</a>
+                        <form
+                            hx-post="{% url 'analyzer:generate-share-link' uuid=result.uuid %}"
+                            hx-target="#share-response"
+                            hx-swap="innerHTML"
+                        >
+                            {% csrf_token %}
+                            <button type="submit" class="button">Share Results</button>
+                        </form>
+                    </div>
+                    <div id="share-response" class="share-response">
+                        {% if result.share_enabled %}
+                            <div class="share-box">
+                                <input class="share-input" type="text" readonly value="{{ share_url }}">
+                                <button class="button button--secondary" type="button" onclick="navigator.clipboard.writeText('{{ share_url }}')">Copy URL</button>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-header">
+                <h2>Section scores</h2>
+                <p>Color coding follows the PRD thresholds: red below 50, amber 50-74, green 75+.</p>
+            </div>
+            <div class="section-score-list">
+                {% for section in result.sections %}
+                    <div class="score-row">
+                        <div class="score-row__meta">
+                            <strong>{{ section.name }}</strong>
+                            <span>{{ section.score }}/100</span>
+                        </div>
+                        <div class="meter">
+                            <div class="meter__fill meter__fill--{% if section.score < 50 %}danger{% elif section.score < 75 %}warning{% else %}success{% endif %}" style="width: {{ section.score }}%"></div>
+                        </div>
+                        <p class="score-row__feedback">{{ section.feedback }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <aside class="results-side">
+        <div class="panel panel--success">
+            <div class="panel-header">
+                <h2>Strengths</h2>
+                <p>What already works well in the current version.</p>
+            </div>
+            <ul class="bullet-list">
+                {% for item in result.strengths %}
+                    <li>{{ item }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div class="panel panel--warning">
+            <div class="panel-header">
+                <h2>Top Actions to Improve Your Score</h2>
+                <p>Priority fixes to address before the next application round.</p>
+            </div>
+            <ul class="bullet-list">
+                {% for item in result.improvements %}
+                    <li>{{ item }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div class="panel">
+            <div class="panel-header">
+                <h2>Keywords</h2>
+                <p>Matched versus missing terms inferred from the target context.</p>
+            </div>
+            <div class="chips-grid">
+                <div>
+                    <h3>Found</h3>
+                    <div class="chip-wrap">
+                        {% for keyword in result.keywords_found %}
+                            <span class="chip chip--success">{{ keyword }}</span>
+                        {% empty %}
+                            <span class="muted">No strong keyword matches detected.</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div>
+                    <h3>Missing</h3>
+                    <div class="chip-wrap">
+                        {% for keyword in result.keywords_missing %}
+                            <span class="chip">{{ keyword }}</span>
+                        {% empty %}
+                            <span class="muted">No missing keywords flagged.</span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-header">
+                <h2>ATS Risk</h2>
+                <p>Likelihood that automated screening weakens visibility before human review.</p>
+            </div>
+            <div class="pill pill--{% if result.ats_risk == 'High' %}danger{% elif result.ats_risk == 'Medium' %}warning{% else %}success{% endif %}">
+                {{ result.ats_risk }} ATS Risk
+            </div>
+            <p class="tooltip-copy">{{ result.ats_risk_explanation }}</p>
+        </div>
+    </aside>
+</section>
+{% endblock %}
